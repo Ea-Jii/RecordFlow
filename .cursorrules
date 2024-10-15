@@ -1,0 +1,136 @@
+
+# RecordFlow: Online Grade Management System
+
+## Technology Stack
+
+| Component         | Technology                                      |
+|-------------------|-------------------------------------------------|
+| Frontend          | **JavaScript**, **Vue 3**, **Shadcn Vue**        |
+| Backend           | **Firebase** (Firestore, Authentication)        |
+| Hosting           | Firebase Hosting                                |
+| State Management  | Vue's **reactive API** (`ref` and `reactive`)   |
+| Database          | Firestore (NoSQL)                               |
+| Authentication    | Firebase Authentication                         |
+| UI Library        | Shadcn Vue (for reusable components)            |
+
+---
+
+## Project Structure
+
+Your app will follow the hierarchy of:
+
+**Year Group (e.g., "Grade 1", "First Year") → Subjects → Classes → Student Records**
+
+### 1. **Year Group (e.g., "Grade 1", "First Year")**
+   - Year Groups are the top-level categories.
+   - Firebase Firestore will store each Year Group as a collection with related subjects.
+   - Users can create, edit, or delete Year Groups.
+
+### 2. **Subjects**
+   - Each Year Group will have several subjects.
+   - Subjects will be displayed as **cards** in the UI, and selecting a subject will lead to classes.
+   - Each subject is stored as a document within a Year Group collection in Firestore.
+
+### 3. **Classes**
+   - Each subject contains multiple classes.
+   - Classes will be displayed as **tabs** under the selected subject.
+   - Firestore will store each class as a subcollection within the subject document.
+
+### 4. **Student Records**
+   - Each class contains student records.
+   - Student data (name, ID, grades) is stored as documents inside the class subcollection in Firestore.
+
+---
+
+## UI Components
+
+### Dashboard
+- **Cards for Subjects**: Each subject will be displayed as a card. Clicking a card navigates to the classes for that subject.
+- **Tabs for Classes**: When a subject is selected, classes will be shown as tabs to switch between and view records.
+- **Responsive Design**: Use **Shadcn Vue** and utility classes for a responsive layout.
+
+### Record Management
+- **Student Table**: Use a **table component** to display student data (name, ID, grades) with sorting and inline editing.
+- **Add/Edit/Delete Functions**: Include buttons to modify student records directly in the table with real-time Firebase updates.
+
+### Authentication
+- **Firebase Authentication** will handle sign-ups and logins, including email/password or Google login.
+- Use Vue’s **`onMounted`** lifecycle hook to manage user sessions and authentication state.
+
+---
+
+## Firebase Integration
+
+### Firestore (Database)
+- **Year Groups**: Stored as collections (e.g., "Grade 1", "Grade 2").
+- **Subjects**: Documents in the Year Group collection. Each document represents a subject.
+- **Classes**: Subcollections in subject documents representing classes with student records.
+- **Student Records**: Documents inside class subcollections, with fields for name, ID, and grades.
+
+### Firebase Authentication
+- Users can log in via **email/password** or **Google**.
+- Use Vue's reactive state to manage the authentication status.
+
+---
+
+## Features
+
+### 1. **Dynamic Forms for Input**
+   - Allow teachers to input new students, grades, or subjects using forms.
+   - Use **Shadcn Vue’s dialog components** for adding or editing subjects and classes.
+
+### 2. **Inline Editing of Tables**
+   - Enable inline table editing to update grades directly.
+   - **Table Sorting**: Add sorting capabilities to student tables.
+   - **Search Bar**: Quickly locate students within the records.
+
+### 3. **Offline Support (Optional)**
+   - Utilize Firestore’s offline capabilities to ensure data sync when the user reconnects.
+
+---
+
+## Security and Authentication
+
+- Ensure data security with **Firebase Security Rules**, restricting access to user-specific data.
+- Handle login securely with Firebase’s email/password and Google authentication.
+
+---
+
+## PWA Consideration (Optional)
+- If extended as a **PWA**, Firebase Hosting will facilitate caching and auto-updates through **service workers**.
+
+---
+
+## Example Component (Subject Card)
+
+```javascript
+<script setup>
+import { ref, onMounted } from 'vue';
+import { Card, Button } from 'shadcn-vue'; // Example Shadcn Vue components
+import { db } from './firebase'; // Firebase Firestore reference
+
+const subjects = ref([]);
+
+onMounted(async () => {
+  const subjectsSnapshot = await db.collection('YearGroups').doc('Grade1').collection('subjects').get();
+  subjects.value = subjectsSnapshot.docs.map(doc => doc.data());
+});
+
+function handleSubjectClick(subjectId) {
+  console.log(`Navigating to subject: ${subjectId}`);
+}
+</script>
+
+<template>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <Card v-for="subject in subjects" :key="subject.id">
+      <h2>{{ subject.name }}</h2>
+      <Button @click="handleSubjectClick(subject.id)">View Classes</Button>
+    </Card>
+  </div>
+</template>
+```
+
+---
+
+This guide provides a foundation for building **RecordFlow** using JavaScript, Vue 3, Shadcn Vue, and Firebase!
